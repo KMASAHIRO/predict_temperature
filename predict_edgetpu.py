@@ -66,10 +66,17 @@ def main(args):
     pre_end = time.perf_counter()
     pre_time = pre_end - pre_start
     if pre_time < 1:
-        print("The cpu's temp will be " + str(pred[0,0]) + " ℃ in " + 
+        print("The cpu's temp will be " + str(pred[0,0]) + "℃ in " + 
         str(1-pre_time) + " s.")
+        
+        time.sleep(1-pre_time)
+        res = subprocess.run(['cat', '/sys/class/thermal/thermal_zone0/temp'],
+        stdout=subprocess.PIPE)
+        result = res.stdout.decode('utf-8')
+        result = int(result)/1000
+        print("The cpu's temp is " + str(result) + "℃.")
     else:
-        print("The cpu's temp was " + str(pred[0,0]) + " ℃ " + 
+        print("The cpu's temp must have been " + str(pred[0,0]) + "℃ " + 
         str(1-pre_time) + " s ago.")
     
     end = time.perf_counter()
