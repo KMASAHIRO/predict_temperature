@@ -1,26 +1,17 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-#  compare_time.py
-#  
-#  Copyright 2020  <pi@raspberrypi>
-#  
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#  
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#  
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA 02110-1301, USA.
-#  
-#  
+'''
+Predict the next day's temperature based on the test
+data(one day's average temperature for 30 days) using
+the quantized model for edgetpu, and measure time
+it took to predict.
+
+Output is the predicted temperature and the measured
+time.
+
+Environments
+Raspbian 10 (Raspberry pi4)
+tflite_runtime 2.1.0.post1
+edgetpu_runtime 2.1.4
+'''
 
 import numpy as np
 import pandas as pd
@@ -28,15 +19,19 @@ import tflite_runtime.interpreter as tflite
 import time
 
 def main(args):
+    #interpret the quanitzed model for edgetpu
     interpreter = tflite.Interpreter('/home/pi/cnn_weather/cnn_weather_lite_quantized_edgetpu.tflite',
     experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
     
+    #load and arrange the test data
     data = pd.read_csv('/home/pi/cnn_weather/test.csv')
     test_data = np.asarray(data.loc[:len(data),"平均気温"],dtype=np.uint8)
     test_data = test_data.reshape(1,30,1)
     
+    #measure time to predict
     start = time.perf_counter()
     
+    #predict
     interpreter.allocate_tensors()
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
@@ -49,6 +44,7 @@ def main(args):
     
     end = time.perf_counter()
     
+    #print the output
     print("The next day's temperature is " + str(output_data[0,0]) + " degrees Celsius.")
     print("It took " + str((end-start)*1000) + " ms.")
     

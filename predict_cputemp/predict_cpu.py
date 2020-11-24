@@ -1,26 +1,14 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-#  predict_cpu.py
-#  
-#  Copyright 2020  <pi@raspberrypi>
-#  
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#  
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#  
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA 02110-1301, USA.
-#  
-#  
+'''
+Get the cpu temperature every second for 30 seconds,
+and predict the next temperature using the non-quantized
+tflite model for cpu.
+Output is the predicted next temperature and the real
+next temperature, seconds it took to run this code.
+
+Environments
+Raspbian 10 (Raspberry pi4)
+tflite_runtime 2.1.0.post1
+'''
 
 import numpy as np
 import tflite_runtime.interpreter as tflite
@@ -29,8 +17,11 @@ import subprocess
 
 def main(args):
     start = time.perf_counter()
+    
+    #interpret the non-quantized tflite model for cpu
     interpreter = tflite.Interpreter('/home/pi/cnn_weather/cnn_weather_lite.tflite')
     
+    #get the cpu temperature and print it
     data = list()
     for i in range(30):
         res = subprocess.run(['cat', '/sys/class/thermal/thermal_zone0/temp'],
@@ -45,11 +36,13 @@ def main(args):
         get_end = time.perf_counter()
         get_time = get_end-get_start
         
+        #sleep until a second passes
         if get_time < 1:
             time.sleep(1-get_time)
         else:
             print("Took " + str(get_time) + " s to get " +  str(i) + "'s temp.")
     
+    #arrange the data and predict
     pre_start = time.perf_counter()
     np_data = np.asarray(data,dtype=np.float32).reshape(1,30,1)
     
@@ -64,6 +57,8 @@ def main(args):
     
     pre_end = time.perf_counter()
     pre_time = pre_end - pre_start
+    
+    #print the output
     if pre_time < 1:
         print("The cpu's temp will be " + str(pred[0,0]) + "℃ in " + 
         str(1-pre_time) + " s.")
