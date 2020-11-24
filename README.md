@@ -11,7 +11,7 @@ In addition, I predicted Raspberry pi's CPU temperature.
 
 This repo includes all the files I used to take these steps.
 
-# Envs
+# Environments
 ### Training, converting and compiling the model
 - Google Colab
 - Tensorflow 2.3.1
@@ -29,6 +29,9 @@ This directory includes an ipynb file I ran on Google Colab, three TFLite models
 
 In ```cnn_weather.ipynb```, I made and trained the keras model. Then, I converted the model to two TFLite models,
 one of which is quantized and the other is not. The quantized model was compiled to run on Edge TPU.
+(reference about converting:https://www.tensorflow.org/lite/performance/post_training_integer_quant)
+(reference about installing edgetpu_compiler:https://coral.ai/docs/edgetpu/compiler/#download)
+(reference about compiling:https://coral.ai/docs/edgetpu/compiler/#usage)
 
 ```cnn_weather_lite.tflite``` is a non-quantized TFLite model file made in ```cnn_weather.ipynb```.
 
@@ -40,6 +43,7 @@ one of which is quantized and the other is not. The quantized model was compiled
 
 ## predict_cputemp
 This directory includes three python files I ran on Raspberry pi 4 to predict CPU temperature.
+(reference about predicting:https://www.tensorflow.org/lite/guide/inference)
 
 ```predict_cpu.py``` gets CPU temperature of a Linux machine every second for 30 seconds and predicts the next temperature
 on the non-quantized model for CPU.
@@ -57,6 +61,7 @@ This code outputs the input temperatures, the predicted next temperature, the re
 ## predict_test
 This directory includes three python files I ran on Raspberry pi 4 to predict the next day's temperature
 using test data, and the test data of csv.
+(reference about predicting:https://www.tensorflow.org/lite/guide/inference)
 
 ```cpu_quantized_time.py``` predicts the next day's temperature on the quantized model for CPU and outputs the temperature
 and time to predict.
